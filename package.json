@@ -1,13 +1,39 @@
 {
-  "dependences": {},
   "dependencies": {
-    "socket.io": "^1.2.1",
-    "express": "^4.10.4",
-    "requiredir": "^1.0.6",
     "async": "^0.9.0",
-    "lodash": "^2.4.1",
     "body-parser": "^1.10.0",
     "cookie-parser": "^1.3.3",
-    "express-session": "^1.9.3"
-  }
+    "express": "^4.10.4",
+    "express-session": "^1.9.3",
+    "ext-webix": "^0.2.2",
+    "lodash": "^2.4.1",
+    "mongoose": "^4.4.5",
+    "socket.io": "^1.2.1"
+  },
+  "name": "socket-express-boilerplate",
+  "version": "0.0.1",
+  "description": "boilerplate for ext-webix and express/socket.io backend",
+  "main": "app.js",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-browserify": "^0.5.1",
+    "mocha": "^2.4.5"
+  },
+  "scripts": {
+    "test": "mocha --recursive --timeout 5000 test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Brainenjii/socket-express-boilerplate.git"
+  },
+  "keywords": [
+    "ext-webix",
+    "boilerplate"
+  ],
+  "author": "Theodor Shaytanov <brainenjii@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Brainenjii/socket-express-boilerplate/issues"
+  },
+  "homepage": "https://github.com/Brainenjii/socket-express-boilerplate#readme"
 }

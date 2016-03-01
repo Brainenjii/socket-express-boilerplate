@@ -1,0 +1,18 @@
+{
+	"mongo": {
+		"active": false,
+		"uri": "mongodb://localhost/test"
+	},
+	"express": {
+		"port": 4002,
+		"cors": true,
+		"session": {
+			"active": true,
+			"secret": "secret"
+		}
+	},
+	"socket": {
+		"active": true,
+		"path": "socket.io"
+	}
+}

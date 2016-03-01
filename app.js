@@ -1,47 +1,123 @@
 "use strict";
-var app, managers = require("manager"), session = require("express-session"),
-  bodyParser = require("body-parser"), cookieParser = require("cookie-parser"),
-  serverConfig = require("./serverConfig"), config = require("helper/config"),
-  serverHelper = require("helper/server"),
-//  db = require("helpers/db"),
-  express = require("express"),
-  socketIO = require("socket.io"),
-  _ = require("lodash"), async = require("async");
 
-app = express();
-app.use(bodyParser.json());
-app.use(cookieParser());
-app.use(session({
-  secret: "secret",
-  resave: false,
-  saveUninitialized: false
-}));
-app.use(serverHelper.corsHandler);
+var mongoose,
+	socketIO,
+	io,
+	server,
 
-_.extend(config, serverConfig);
+	_ = require( "lodash" ),
+	http = require( "http" ),
+	async = require( "async" ),
+	bodyParser = require( "body-parser" ),
+	cookieParser = require( "cookie-parser" ),
+	express = require( "express" ),
+	app = express(),
+	session = require( "express-session" ),
 
-serverHelper.init({
-  app: app,
-  io: socketIO
-});
+	serverConfig = require( "./serverConfig" ),
+	serverHelper = require( "./lib/helper/server" ),
+	managers = require( "./lib/manager" );
 
-async.series([function (callback) {
-//  db.init(callback);
-  callback();
-}, function (callback) {
-  async.each(_.sortBy(managers.toArray(), "initWeight"),
-    function (manager, callback) {
-      if (manager.init) {manager.init(); }
-      if (manager.load) {
-        manager.load(null, callback);
-      } else {
-        callback();
-      }
-    }, callback);
-}], function (err) {
-  if (err) {console.log(err); process.exit(); }
+app.use( bodyParser.json() );
+app.use( cookieParser() );
 
-  app.listen(config.port, function () {
-    console.log("all your request are belong to us");
-  });
-});
+if ( serverConfig.express.session.active ) {
+
+	app.use( session( {
+		secret: "secret",
+		resave: false,
+		saveUninitialized: false
+	} ) );
+
+}
+
+if ( serverConfig.express.cors ) {
+
+	app.use( serverHelper.corsHandler );
+
+}
+
+// noinspection JSUnusedGlobalSymbols
+async.series( [function appInitialization ( callback ) {
+
+	if ( serverConfig.mongo.active ) {
+
+		mongoose = require( "mongoose" );
+		mongoose.connect( serverConfig.mongo.uri );
+
+	}
+	callback();
+
+}, function socketInitialization ( callback ) {
+
+	server = http.createServer( app );
+
+	if ( serverConfig.socket.active ) {
+
+		socketIO = require( "socket.io" );
+		io = socketIO( server );
+		io.set( "transports", ["websocket", "polling"] );
+
+	}
+	serverHelper.init( {
+		app: app,
+		io: io
+	} );
+	callback();
+
+}, function managersInitialization ( callback ) {
+
+	async.each( _.sortBy( managers.toArray(), "initWeight" ),
+		function managerInitialization ( manager, callback ) {
+
+			if ( manager.init ) {
+
+				manager.init();
+
+			}
+
+			if ( manager.load ) {
+
+				return manager.load( null, callback );
+
+			}
+
+			return callback();
+
+		}, callback );
+
+}], function startPrepare ( err ) {
+
+	if ( err ) {
+
+		// Do your log here
+		console.error( err );
+		process.exit( 1 );
+
+	}
+
+	app.use( express.static( "dist" ) );
+
+	server.listen( serverConfig.express.port, function startHandler () {
+
+		io.on( "connection", function connectionHandler ( socket ) {
+
+			setInterval( function workaround () {
+
+				socket.emit( "wtf", "wtf" );
+
+			}, 5000 );
+
+			socket.on( "message",
+				function messageHandler ( request, callback ) {
+
+					serverHelper.socketHandler( request, socket, callback );
+
+				} );
+
+		} );
+		console.log( "all your request are belong to us" );
+
+	} );
+
+} );
