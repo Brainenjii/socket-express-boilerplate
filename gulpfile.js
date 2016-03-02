@@ -8,19 +8,30 @@ var gulp = require( "gulp" ),
 gulp.task( "scripts", function scripts () {
 
 	// Single entry point to browserify
-	gulp.src( "src/lib/app.js" ).pipe(
+	var processing = gulp.src(
+		"src/lib/app.js"
+	).pipe(
 		browserify( {
 			insertGlobals: false,
 			debug: true
 		} )
-	).pipe( gulp.dest( "./dist/js/" ) );
+	).on(
+		"error",
+		function handleError ( err ) {
+
+			console.error( err.toString() );
+			processing.emit( "end" );
+
+		}
+	).pipe(
+		gulp.dest( "./dist/js/" )
+	);
 
 } );
 
 gulp.task( "watch", function watchHandler () {
 
-	gulp.watch( "src/lib/**/*.js", ["scripts"] ).
-		on( "error", console.log.bind( console ) );
+	gulp.watch( "src/lib/**/*.js", ["scripts"] );
 
 } );
 
