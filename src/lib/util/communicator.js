@@ -43,7 +43,7 @@ me = module.exports = {
 			"Content-Type": "application/json",
 			"Data-Type": "json"
 		} )[method]( me.config.socketURI + path,
-			JSON.stringify( data ), {
+			method === "get" ? data : JSON.stringify( data ), {
 				success: function responseHandler ( response ) {
 
 					callback( null, JSON.parse( response ) );
@@ -51,6 +51,7 @@ me = module.exports = {
 				},
 				error: function errorHandler ( error ) {
 
+					console.log( arguments );
 					callback( JSON.parse( error ) );
 
 				}
